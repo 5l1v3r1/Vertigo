@@ -2,7 +2,8 @@ Temp/
 Obj/
 UnityGenerated/
 Library/
- 
+*.meta
+
 ExportedObj/
 *.svd
 *.userprefs
