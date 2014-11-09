@@ -8,6 +8,12 @@ public var balance : float = 0f;//arm balance of the player (negative: leaning l
 public var tightRopeSpeed : float = 0.5f;//movement speed while on a tight rope
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
 
+private var isBirdGenerationStarted : boolean = false;
+public var birdPrefab : GameObject;
+private var birdRotation;
+private var currentTightRope : GameObject;
+private var birdStartPoint;
+
 /*
 updates the player's arm balancing
 */
@@ -41,11 +47,23 @@ function Update () {
 	if(inTightRopeArea) {
 		directionVector = Vector3.forward * tightRopeSpeed;	
 		calculateBalance();
+		if(!isBirdGenerationStarted){
+		
+			// generate birds while players on the tight rope area
+			StartCoroutine(GenerateBirds());
+			// to launch the coroutine only once
+			isBirdGenerationStarted = true;
+		}
 	}
 	
 	else {
 		directionVector = new Vector3(-Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
 		motor.inputJump = Input.GetButton("Jump");
+		if(isBirdGenerationStarted)
+		{
+			StopCoroutine(GenerateBirds());
+			isBirdGenerationStarted = false;
+		}
 	}
 	
 	if (directionVector != Vector3.zero) {
@@ -73,6 +91,23 @@ function Update () {
 function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "TightRopeArea") {
 		inTightRopeArea = true;
+		var rotPlayer = transform.rotation;
+		var rotTightRopeArea = trigger.transform.rotation;
+		var rotationY =  Quaternion.Angle(rotPlayer, rotTightRopeArea);
+		
+		currentTightRope = trigger.gameObject;
+		birdRotation = currentTightRope.transform.rotation;
+		birdStartPoint = currentTightRope.transform.position;
+		var areaScaleZ = currentTightRope.transform.parent.transform.localScale.z;
+		if(rotationY < 90){
+			birdRotation = currentTightRope.transform.rotation * Quaternion.AngleAxis(180, Vector3.up);;
+			birdStartPoint += Vector3(0,0,areaScaleZ + 1);
+		}
+		else{
+			birdStartPoint += Vector3(0,0,-(areaScaleZ + 1));
+
+
+		}
 	}
 }
 
@@ -84,6 +119,38 @@ function OnTriggerExit(trigger : Collider) {
 		transform.localEulerAngles.x = 0;
 	}
 }
+/*
+ * Generate wave of a random number of bird flying near the player
+ */
+function GenerateBirds(){
+	
+	while(inTightRopeArea){
+		var difficulty:int = Random.Range(1, 4); //between 1 and 3
+
+		// generate a wave
+		for(var i: int=1; i<=difficulty; i++) 
+		{
+			// random altitude
+			var alt:int = Random.Range(1, 4);
+			alt /=2;	// alt between 0.5 and 1.5
+			
+			// random side (left or right)
+			var arrayLeftOrRight = new Array(-0.5, 0.5);			
+			var leftOrRight = arrayLeftOrRight[Random.Range(0, arrayLeftOrRight.length)];
+			
+			// creation of an instance of a bird
+			var instance : GameObject = Instantiate(birdPrefab, 
+													birdStartPoint + Vector3(leftOrRight,0,0) + Vector3(0,alt,0),
+													birdRotation);
+			// generation of a bird every 0.2 seconds
+			yield WaitForSeconds(0.2);
+		}
+		
+		// generation of a wave about every 2-3 seconds
+		yield WaitForSeconds(2);
+	}
+}
+
 // Require a character controller to be attached to the same game object
 @script RequireComponent (CharacterMotor)
 @script AddComponentMenu ("Character/FPS Input Controller")
