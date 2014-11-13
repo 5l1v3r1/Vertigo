@@ -48,23 +48,23 @@ function Update () {
 	if(inTightRopeArea) {
 		directionVector = Vector3.forward * tightRopeSpeed;	
 		calculateBalance();
-		if(!isBirdGenerationStarted){
+		//if(!isBirdGenerationStarted){
 		
 			// generate birds while players on the tight rope area
-			StartCoroutine(GenerateBirds());
+			//StartCoroutine(GenerateBirds());
 			// to launch the coroutine only once
-			isBirdGenerationStarted = true;
-		}
+		//	isBirdGenerationStarted = true;
+		//}
 	}
 	
 	else {
 		directionVector = new Vector3(-Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
 		motor.inputJump = Input.GetButton("Jump");
-		if(isBirdGenerationStarted)
+		/*if(isBirdGenerationStarted)
 		{
-			StopCoroutine(GenerateBirds());
+//			StopCoroutine(GenerateBirds());
 			isBirdGenerationStarted = false;
-		}
+		}*/	
 	}
 	
 	if (directionVector != Vector3.zero) {
@@ -92,8 +92,9 @@ function Update () {
 function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "TightRopeArea") {
 		inTightRopeArea = true;
-		
-		currentTightRope = trigger.gameObject;
+		trigger.BroadcastMessage("launchGeneration");
+		//trigger.BroadcastMessage("GenerateBirds");
+		/*currentTightRope = trigger.gameObject;
 		birdRotation = currentTightRope.transform.rotation;
 		birdStartPoint = currentTightRope.transform.position;
 		var areaScaleZ = currentTightRope.transform.localScale.z;
@@ -108,7 +109,7 @@ function OnTriggerEnter(trigger : Collider) {
 		}
 		else{
 			isSameDir = true;
-		}
+		}*/
 	}
 }
 
@@ -118,12 +119,14 @@ function OnTriggerExit(trigger : Collider) {
 		balance = 0;
 		transform.localEulerAngles.z = 0;
 		transform.localEulerAngles.x = 0;
+		trigger.BroadcastMessage("stopGeneration");
+
 	}
 }
 /*
  * Generate wave of a random number of bird flying near the player
  */
-function GenerateBirds(){
+/*function GenerateBirds(){
 	
 	while(inTightRopeArea){
 		var difficulty:int = Random.Range(1, 4); //between 1 and 3
@@ -173,7 +176,7 @@ function GenerateBirds(){
 		// generation of a wave about every 1,5 seconds
 		yield WaitForSeconds(1.5);
 	}
-}
+}*/
 
 // Require a character controller to be attached to the same game object
 @script RequireComponent (CharacterMotor)

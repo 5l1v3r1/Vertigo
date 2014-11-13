@@ -1,21 +1,16 @@
 ﻿#pragma strict
 
 // the life duration of the bird
-var timer: int = 10;
+public var timer: int = 10;
 
 function Start () {
-
-	//instance.transform.parent = currentTightRope.transform;
-
-	//transform.rotation(p.rotation);
+	audio.Play();
 	StartCoroutine(WaitAndDestroy());
 }
 
 function Update () {
-
-	transform.Translate(Vector3.forward*0.1);
-
 }
+
 
 /*
  *	Destroy the bird after 'timer' seconds
@@ -23,6 +18,10 @@ function Update () {
 function WaitAndDestroy(){
 	yield WaitForSeconds(timer);
 	Destroy (gameObject);
+}
+
+function FixedUpdate(){
+	transform.Translate(Vector3.forward*0.1);
 }
 
 
