@@ -17,4 +17,4 @@ function OnTriggerEnter(collision : Collider) {
 			script.activate();
 		}
 	}
-}
+}	

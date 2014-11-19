@@ -93,6 +93,7 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "TightRopeArea") {
 		inTightRopeArea = true;
 		trigger.BroadcastMessage("launchGeneration");
+		
 		//trigger.BroadcastMessage("GenerateBirds");
 		/*currentTightRope = trigger.gameObject;
 		birdRotation = currentTightRope.transform.rotation;
@@ -120,7 +121,6 @@ function OnTriggerExit(trigger : Collider) {
 		transform.localEulerAngles.z = 0;
 		transform.localEulerAngles.x = 0;
 		trigger.BroadcastMessage("stopGeneration");
-
 	}
 }
 /*
