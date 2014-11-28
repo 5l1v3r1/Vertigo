@@ -17,6 +17,7 @@ private var currentTightRope : GameObject;
 private var birdStartPoint;
 private var isSameDir : boolean;
 private var razerHydra;
+private var razerJumpAccel : float = 0.5f;
 
 /*
 updates the player's arm balancing
@@ -24,17 +25,17 @@ updates the player's arm balancing
 function calculateBalance(){
 
 	//razer hydra emulation
-	if(Input.GetKeyDown(KeyCode.A)) {
+	/*if(Input.GetKeyDown(KeyCode.A)) {
 		balance += -balanceStep;
 	}
 	if(Input.GetKeyDown(KeyCode.E)) {
 		balance += balanceStep;
-	}
+	}*/
 	
 	//update current rotation according to the balance
-	transform.localEulerAngles.z = -balance;
+	transform.localEulerAngles.z = -razerHydra.balance;
 	//simulate dizziness
-	transform.Rotate(Vector3.up * Time.deltaTime * balance*balance/10);
+	transform.Rotate(Vector3.up * Time.deltaTime * razerHydra.balance);
 }
 
 // Use this for initialization
@@ -64,7 +65,13 @@ function Update () {
 			directionVector = new Vector3(razerHydra.leftJoyInput.x, 0, razerHydra.leftJoyInput.y);
 		}
 
-		motor.inputJump = Input.GetButton("Jump");
+		if(!VREnabled){
+			motor.inputJump = Input.GetButton("Jump");
+		}
+		
+		else {
+			motor.inputJump = razerHydra.leftTrackerAccel.y > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
+		}
 	}
 	
 	if (directionVector != Vector3.zero) {

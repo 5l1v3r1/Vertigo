@@ -78,12 +78,10 @@ public class GamePad : MonoBehaviour {
 					
 					if (fourth > deadZone|| fourth < -deadZone)
 					{
-						Debug.Log ("j");
 						transform.RotateAround(headNode.transform.position, new Vector3(0,1,0), camSens*deltaTime*fourth);
 					}
 					if(x * x + y * y > deadZone * deadZone)
 					{
-						Debug.Log ("j");
 						transform.Translate(-handDir*mainSpeed*deltaTime*y, Space.World);
 						transform.Translate(handDirLat*mainSpeed*deltaTime*x, Space.World);
 					}
