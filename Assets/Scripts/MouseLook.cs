@@ -28,26 +28,31 @@ public class MouseLook : MonoBehaviour {
 	public float minimumY = -60F;
 	public float maximumY = 60F;
 
+	RazerHydra razerHydra;
+	public bool VREnabled = true;
+
 	float rotationY = 0F;
 
 	void Update ()
 	{	
 		if (axes == RotationAxes.MouseXAndY)
 		{
-			float rotationX = transform.localEulerAngles.y + Input.GetAxis("Horizontal") * sensitivityX;
-			
-			rotationY += Input.GetAxis("Vertical") * sensitivityY;
+			//float rotationX = transform.localEulerAngles.y + Input.GetAxis("Horizontal") * sensitivityX;
+			float rotationX = transform.localEulerAngles.y + razerHydra.rightJoyInput.x;
+
+			//rotationY += Input.GetAxis("Vertical") * sensitivityY;
+			rotationY += razerHydra.rightJoyInput.y;
 			rotationY = Mathf.Clamp (rotationY, minimumY, maximumY);
 			
 			transform.localEulerAngles = new Vector3(-rotationY, rotationX, 0);
 		}
 		else if (axes == RotationAxes.MouseX)
 		{
-			transform.Rotate(0, Input.GetAxis("Horizontal") * sensitivityX, 0);
+			transform.Rotate(0, razerHydra.rightJoyInput.x, 0);
 		}
 		else
 		{
-			rotationY += Input.GetAxis("Vertical") * sensitivityY;
+			rotationY += razerHydra.rightJoyInput.y;
 			rotationY = Mathf.Clamp (rotationY, minimumY, maximumY);
 			
 			transform.localEulerAngles = new Vector3(-rotationY, transform.localEulerAngles.y, 0);
@@ -59,5 +64,6 @@ public class MouseLook : MonoBehaviour {
 		// Make the rigid body not change rotation
 		if (GetComponent<Rigidbody>())
 			GetComponent<Rigidbody>().freezeRotation = true;
+		razerHydra = GetComponent<RazerHydra> ();
 	}
 }
