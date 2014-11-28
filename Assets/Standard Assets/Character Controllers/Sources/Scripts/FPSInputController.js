@@ -1,4 +1,4 @@
-/*
+	/*
 Modified version of the FPSInputController from CharacterController
 */
 
@@ -6,6 +6,8 @@ private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
 public var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
 public var tightRopeSpeed : float = 0.5f;//movement speed while on a tight rope
+public var VREnabled : boolean = true;//use VR controllers ?
+
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
 
 private var isBirdGenerationStarted : boolean = false;
@@ -14,6 +16,7 @@ private var birdRotation;
 private var currentTightRope : GameObject;
 private var birdStartPoint;
 private var isSameDir : boolean;
+private var razerHydra;
 
 /*
 updates the player's arm balancing
@@ -37,6 +40,7 @@ function calculateBalance(){
 // Use this for initialization
 function Awake () {
 	motor = GetComponent(CharacterMotor);
+	razerHydra = GetComponent("RazerHydra");
 }
 
 // Update is called once per frame
@@ -51,7 +55,15 @@ function Update () {
 	}
 	
 	else {
-		directionVector = new Vector3(-Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
+		
+		if(!VREnabled) {
+			directionVector = new Vector3(Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
+		}
+		
+		else {
+			directionVector = new Vector3(razerHydra.leftJoyInput.x, 0, razerHydra.leftJoyInput.y);
+		}
+
 		motor.inputJump = Input.GetButton("Jump");
 	}
 	
