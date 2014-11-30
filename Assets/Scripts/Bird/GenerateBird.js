@@ -17,7 +17,7 @@ function Update () {
 
 }
 
-public function GenerateBirds(){	
+public function GenerateBirds(){
 		// generate a wave
 		for(var i: int=1; i<=birdNbToGenerate; i++) 
 		{
@@ -31,15 +31,12 @@ public function GenerateBirds(){
 			
 			// deltaPos to Instatiate Birds from the Bird Generator prefab + this deltaPos
 			var deltaPos = Vector3(leftOrRight,alt,0);
-			
-
-			var source: GameObject = transform.parent.gameObject.Find("GenerationSource");
-			deltaPos = source.transform.rotation * deltaPos;
+			var source: Transform = transform.Find("Source");
+			deltaPos = source.rotation * deltaPos;
 			// creation of an instance of a bird at the parent position
 			var instance : GameObject = Instantiate(birdPrefab, 
-													source.transform.position + deltaPos, 
-													source.transform.rotation);
-
+													source.position + deltaPos, 
+													source.rotation);
 			// generation of a bird every "generationInterval" seconds
 			yield WaitForSeconds(generationInterval);
 		}
