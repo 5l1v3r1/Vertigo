@@ -19,6 +19,9 @@ private var isSameDir : boolean;
 private var razerHydra;
 private var razerJumpAccel : float = 0.5f;
 
+public var arrowTop: Texture;
+public var arrowBottom: Texture;
+
 /*
 updates the player's arm balancing
 */
@@ -113,6 +116,30 @@ function OnTriggerExit(trigger : Collider) {
 		transform.localEulerAngles.x = 0;
 	}
 	
+}
+
+function OnGUI() {
+
+	/* Visual metaphors to help the player find his stability*/
+	var x: int;
+	var y: int;
+	if(balance >= 10 && balance <= 30) {
+		x = Screen.width*0.25 - arrowBottom.width/2;
+		y = Screen.height/2 - arrowBottom.height/2;
+		GUI.DrawTexture(Rect(x,y,arrowBottom.width,arrowBottom.height), arrowBottom);
+		x = Screen.width*0.75 - arrowTop.width/2;
+		y = Screen.height/2 - arrowTop.height/2;
+		GUI.DrawTexture(Rect(x,y,arrowTop.width,arrowTop.height), arrowTop);
+	}
+	if(balance <= -10 && balance >= -30) {	
+		x = Screen.width*0.25 - arrowTop.width/2;
+		y = Screen.height/2 - arrowTop.height/2;
+		GUI.DrawTexture(Rect(x,y,arrowTop.width,arrowTop.height), arrowTop);
+		x = Screen.width*0.75 - arrowBottom.width/2;
+		y = Screen.height/2 - arrowBottom.height/2;
+		GUI.DrawTexture(Rect(x,y,arrowBottom.width,arrowBottom.height), arrowBottom);
+
+	}
 }
 
 
