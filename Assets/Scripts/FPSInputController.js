@@ -106,6 +106,10 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "BirdTrigger"){
 		trigger.GetComponent("GenerateBird").GenerateBirds();
 	}
+	if(trigger.tag == "WindTrigger"){
+		Debug.Log("Wind");
+		trigger.GetComponentInChildren(ParticleSystem).Play();
+	}
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -115,7 +119,9 @@ function OnTriggerExit(trigger : Collider) {
 		transform.localEulerAngles.z = 0;
 		transform.localEulerAngles.x = 0;
 	}
-	
+	if(trigger.tag == "WindTrigger"){
+		trigger.GetComponentInChildren(ParticleSystem).Stop();
+	}
 }
 
 function OnGUI() {
