@@ -123,31 +123,40 @@ function OnTriggerExit(trigger : Collider) {
 	}
 }
 
+
 function OnGUI() {
 
 	/* Visual metaphors to help the player find his stability*/
 	var x: int;
 	var y: int;
-	if(razerHydra.balance >= 10 && razerHydra.balance <= 30) {
-	
-		x = Screen.width*0.25 - arrowBottom.width/2;
-		y = Screen.height/2 - arrowBottom.height/2;
-		GUI.DrawTexture(Rect(x,y,arrowBottom.width,arrowBottom.height), arrowBottom);
-		x = Screen.width*0.75 - arrowTop.width/2;
-		y = Screen.height/2 - arrowTop.height/2;
-		GUI.DrawTexture(Rect(x,y,arrowTop.width,arrowTop.height), arrowTop);
-	}
-	if(razerHydra.balance <= -10 && razerHydra.balance >= -30) {	
-		x = Screen.width*0.25 - arrowTop.width/2;
-		y = Screen.height/2 - arrowTop.height/2;
-		GUI.DrawTexture(Rect(x,y,arrowTop.width,arrowTop.height), arrowTop);
-		x = Screen.width*0.75 - arrowBottom.width/2;
-		y = Screen.height/2 - arrowBottom.height/2;
-		GUI.DrawTexture(Rect(x,y,arrowBottom.width,arrowBottom.height), arrowBottom);
+	var originalColor: Color = GUI.color;
+	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
 
+	if(razerHydra.balance >= 10 && razerHydra.balance <= 30) {
+		x = Screen.width*0.25 - Screen.height/6;
+		y = Screen.height/2 - Screen.height/6;
+		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+		x = Screen.width*0.75 - Screen.height/6;
+		y = Screen.height/2 - Screen.height/6;
+		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
 	}
+	if(razerHydra.balance <= -10 && razerHydra.balance >= -30) {
+		x = Screen.width*0.25 - Screen.height/6;
+		y = Screen.height/2 - Screen.height/6;
+		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
+		x = Screen.width*0.75 - Screen.height/6;
+		y = Screen.height/2 - Screen.height/6;
+		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+	}
+	 GUI.color = originalColor;
 }
 
+
+function OnControllerColliderHit(hit: ControllerColliderHit){
+
+	if(hit.gameObject.name == "Sol")
+	 	transform.localPosition = Vector3(0, 0, 0);
+}
 
 // Require a character controller to be attached to the same game object
 @script RequireComponent (CharacterMotor)
