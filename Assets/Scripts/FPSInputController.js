@@ -99,7 +99,7 @@ function Update () {
 	
 	Debug.Log(directionVector);
 	
-	if(motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
+	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
 		footstepDelay += Time.deltaTime;
 		if(footstepDelay > 0.5f) {
 			footsteps.Play();
@@ -150,23 +150,24 @@ function OnGUI() {
 	var y: int;
 	var originalColor: Color = GUI.color;
 	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
-
-	if(razerHydra.balance >= 10 && razerHydra.balance <= 30) {
-		x = Screen.width*0.25 - Screen.height/6;
-		y = Screen.height/2 - Screen.height/6;
-		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
-		x = Screen.width*0.75 - Screen.height/6;
-		y = Screen.height/2 - Screen.height/6;
-		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
-	}
-	if(razerHydra.balance <= -10 && razerHydra.balance >= -30) {
-		x = Screen.width*0.25 - Screen.height/6;
-		y = Screen.height/2 - Screen.height/6;
-		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
-		x = Screen.width*0.75 - Screen.height/6;
-		y = Screen.height/2 - Screen.height/6;
-		GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
-	}
+	if(inTightRopeArea){
+		if(razerHydra.balance >= 20) {
+			x = Screen.width*0.25 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/6;
+			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+			x = Screen.width*0.75 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/6;
+			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
+		}
+		if(razerHydra.balance <= -20) {
+			x = Screen.width*0.25 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/6;
+			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
+			x = Screen.width*0.75 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/6;
+			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+		}
+	} 
 	 GUI.color = originalColor;
 }
 
