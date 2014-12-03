@@ -107,7 +107,6 @@ function OnTriggerEnter(trigger : Collider) {
 		trigger.GetComponent("GenerateBird").GenerateBirds();
 	}
 	if(trigger.tag == "WindTrigger"){
-		Debug.Log("Wind");
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 	}
 }

@@ -32,30 +32,45 @@ public class MouseLook : MonoBehaviour {
 	public bool VREnabled = true;
 
 	float rotationY = 0F;
+	
+	float rotationX;
 
 	void Update ()
 	{	
 		if (axes == RotationAxes.MouseXAndY)
 		{
-			//float rotationX = transform.localEulerAngles.y + Input.GetAxis("Horizontal") * sensitivityX;
-			float rotationX = transform.localEulerAngles.y + razerHydra.rightJoyInput.x;
+			if(!VREnabled)
+				rotationX = transform.localEulerAngles.y + Input.GetAxis("Horizontal") * sensitivityX;
+			else
+				rotationX = transform.localEulerAngles.y + razerHydra.rightJoyInput.x;
 
-			//rotationY += Input.GetAxis("Vertical") * sensitivityY;
-			rotationY += razerHydra.rightJoyInput.y;
+			if(!VREnabled)
+				rotationY += Input.GetAxis("Vertical") * sensitivityY;
+			else
+				rotationY += razerHydra.rightJoyInput.y;
+
 			rotationY = Mathf.Clamp (rotationY, minimumY, maximumY);
 			
 			transform.localEulerAngles = new Vector3(-rotationY, rotationX, 0);
 		}
 		else if (axes == RotationAxes.MouseX)
 		{
-			transform.Rotate(0, razerHydra.rightJoyInput.x, 0);
+			if(!VREnabled)
+				rotationX = transform.localEulerAngles.y + Input.GetAxis("Horizontal") * sensitivityX;
+			else
+				rotationX = transform.localEulerAngles.y + razerHydra.rightJoyInput.x;
+			
+			transform.localEulerAngles = new Vector3(0, rotationX, 0);
 		}
 		else
 		{
-			rotationY += razerHydra.rightJoyInput.y;
+			if(!VREnabled)
+				rotationY += Input.GetAxis("Vertical") * sensitivityY;
+			else
+				rotationY += razerHydra.rightJoyInput.y;
 			rotationY = Mathf.Clamp (rotationY, minimumY, maximumY);
 			
-			transform.localEulerAngles = new Vector3(-rotationY, transform.localEulerAngles.y, 0);
+			transform.localEulerAngles = new Vector3(-rotationY, 0, 0);
 		}
 	}
 	
