@@ -18,6 +18,9 @@ private var birdStartPoint;
 private var isSameDir : boolean;
 private var razerHydra;
 private var razerJumpAccel : float = 0.5f;
+private var footstepDelay : float = 0f;
+
+public var footsteps : AudioSource;
 
 public var arrowTop: Texture;
 public var arrowBottom: Texture;
@@ -92,6 +95,22 @@ function Update () {
 		
 		// Multiply the normalized direction vector by the modified length
 		directionVector = directionVector * directionLength;
+	}
+	
+	Debug.Log(directionVector);
+	
+	if(motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
+		footstepDelay += Time.deltaTime;
+		if(footstepDelay > 0.5f) {
+			footsteps.Play();
+			//adapt to player speed when using Razer Hydra controllers
+			//footsteps.pitch = directionVector.z * 2;
+			footstepDelay = 0f;
+		}
+	}
+	
+	else if(inTightRopeArea || !motor.grounded || directionVector == Vector3.zero && footsteps.isPlaying) {
+		footsteps.Stop();
 	}
 	
 	// Apply the direction to the CharacterMotor
