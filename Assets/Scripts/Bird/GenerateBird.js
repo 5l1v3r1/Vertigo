@@ -22,8 +22,8 @@ public function GenerateBirds(){
 		for(var i: int=1; i<=birdNbToGenerate; i++) 
 		{
 			// random altitude
-			var alt:int = Random.Range(2, 5);
-			alt /= 2;	// alt between 1, 1.5, 2
+			var alt:int = Random.Range(1, 4);
+			alt /= 2;	// alt between 0.5, 1, 2
 			
 			// random side (left or right)
 			var arrayLeftOrRight = new Array(-1,-0.5, 0.5, 1);			

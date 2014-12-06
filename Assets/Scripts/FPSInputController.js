@@ -17,7 +17,7 @@ private var currentTightRope : GameObject;
 private var birdStartPoint;
 private var isSameDir : boolean;
 private var razerHydra;
-private var razerJumpAccel : float = 0.5f;
+private var razerJumpAccel : float = 0.7f;
 private var footstepDelay : float = 0f;
 
 public var footsteps : AudioSource;
@@ -170,7 +170,9 @@ function OnGUI() {
 	} 
 	 GUI.color = originalColor;
 }
-
+function GetInTightRopeArea(){
+	return inTightRopeArea;
+}
 
 function OnControllerColliderHit(hit: ControllerColliderHit){
 
