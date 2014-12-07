@@ -27,7 +27,7 @@ function OnGUI() {
 	yPos = Screen.height*5/9;
 	
 	if(GUI.Button(Rect(xPos,yPos, buttonWidth,buttonHeight), "PLAY", gs)) {
-		Application.LoadLevel("Zone0");
+		Application.LoadLevel("Zone1");
 	}
 		
 	xPos = 5*Screen.width/9;

@@ -5,7 +5,7 @@ Modified version of the FPSInputController from CharacterController
 private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
 public var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
-public var tightRopeSpeed : float = 0.5f;//movement speed while on a tight rope
+public var tightRopeSpeed : float = 0.2f;//movement speed while on a tight rope
 public var VREnabled : boolean = true;//use VR controllers ?
 
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
@@ -19,6 +19,9 @@ private var isSameDir : boolean;
 private var razerHydra;
 private var razerJumpAccel : float = 0.7f;
 private var footstepDelay : float = 0f;
+private var	canGraspJavelin: boolean = false;
+private var javelin = null;
+public var javelinPrefab = gameObject;
 
 public var footsteps : AudioSource;
 
@@ -30,14 +33,6 @@ updates the player's arm balancing
 */
 function calculateBalance(){
 
-	//razer hydra emulation
-	/*if(Input.GetKeyDown(KeyCode.A)) {
-		balance += -balanceStep;
-	}
-	if(Input.GetKeyDown(KeyCode.E)) {
-		balance += balanceStep;
-	}*/
-	
 	//update current rotation according to the balance
 	transform.localEulerAngles.z = -razerHydra.balance;
 	//simulate dizziness
@@ -60,6 +55,8 @@ function Update () {
 		directionVector = Vector3.forward * tightRopeSpeed;	
 		calculateBalance();
 	}
+
+
 	
 	else {
 		
@@ -76,7 +73,20 @@ function Update () {
 		}
 		
 		else {
-			motor.inputJump = razerHydra.leftTrackerAccel.y > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
+			//motor.inputJump = razerHydra.leftTrackerAccel.y > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
+		}
+		if(canGraspJavelin) {
+			if(Input.GetKey("g")/*razerHydra.button1*/) {
+				if(javelin){ 
+					Destroy(javelin);
+				 	var holdedJavelin: GameObject = Instantiate(javelinPrefab,transform.position + Vector3(0,0,1) ,transform.rotation* Quaternion.Euler(0,0,90));
+					Destroy (holdedJavelin.GetComponent("Capsule Collider"));
+					holdedJavelin.transform.parent = gameObject.transform;
+					holdedJavelin.transform.localPosition = Vector3(0,0,1);
+					canGraspJavelin = false;
+				}
+				
+			}
 		}
 	}
 	
@@ -97,7 +107,7 @@ function Update () {
 		directionVector = directionVector * directionLength;
 	}
 	
-	Debug.Log(directionVector);
+	//Debug.Log(directionVector);
 	
 	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
 		footstepDelay += Time.deltaTime;
@@ -128,6 +138,10 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 	}
+	if(trigger.tag == "Javelin") {
+		javelin = trigger.gameObject;
+		canGraspJavelin = true;
+	}		
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -139,6 +153,10 @@ function OnTriggerExit(trigger : Collider) {
 	}
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Stop();
+	}
+	if(trigger.tag == "Javelin") {
+		javelin = null;
+		canGraspJavelin = false;
 	}
 }
 
@@ -169,6 +187,18 @@ function OnGUI() {
 		}
 	} 
 	 GUI.color = originalColor;
+	 var labWidth: float = Screen.width/2;
+	var labHeight: float = Screen.height/4;
+	var xPos: float = Screen.width/4;
+	var yPos: float = Screen.height/8; 
+	var gs = new GUIStyle(GUI.skin.label);
+	gs.fontSize = 24;
+	gs.fontStyle = FontStyle.Bold;
+	gs.alignment = TextAnchor.MiddleCenter;
+
+		if(canGraspJavelin) {
+			GUI.Label(new Rect(xPos, yPos, labWidth, labHeight),"Appuyer sur la touche 1 de la manette gauche pour saisir le javelot", gs);
+	 	}
 }
 function GetInTightRopeArea(){
 	return inTightRopeArea;
@@ -177,7 +207,7 @@ function GetInTightRopeArea(){
 function OnControllerColliderHit(hit: ControllerColliderHit){
 
 	if(hit.gameObject.name == "Sol")
-	 	transform.localPosition = Vector3(0, 0, 0);
+		transform.localPosition = Vector3(0, 0, 0);
 }
 
 // Require a character controller to be attached to the same game object
