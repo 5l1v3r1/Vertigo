@@ -25,6 +25,10 @@ public var footsteps : AudioSource;
 public var arrowTop: Texture;
 public var arrowBottom: Texture;
 
+private var canGraspJavelin: boolean = false;
+private var javelin = null;
+public var javelinPrefab = gameObject;
+
 /*
 updates the player's arm balancing
 */
@@ -80,6 +84,19 @@ function Update () {
 		}
 	}
 	
+		if(canGraspJavelin) {
+			if(Input.GetKey("g")/*razerHydra.button1*/) {
+				if(javelin){
+					Destroy(javelin);
+					var holdedJavelin: GameObject = Instantiate(javelinPrefab,transform.position + Vector3(0,0,1) ,transform.rotation* Quaternion.Euler(0,0,90));
+					Destroy (holdedJavelin.GetComponent("Capsule Collider"));
+					holdedJavelin.transform.parent = gameObject.transform;
+					holdedJavelin.transform.localPosition = Vector3(0,0,1);
+					canGraspJavelin = false;
+				}
+			}
+		}
+	
 	if (directionVector != Vector3.zero) {
 		// Get the length of the directon vector and then normalize it
 		// Dividing by the length is cheaper than normalizing when we already have the length anyway
@@ -128,6 +145,10 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 	}
+	if(trigger.tag == "Javelin") {
+		javelin = trigger.gameObject;
+		canGraspJavelin = true;
+	}	
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -140,6 +161,10 @@ function OnTriggerExit(trigger : Collider) {
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Stop();
 	}
+	if(trigger.tag == "Javelin") {
+		javelin = null;
+		canGraspJavelin = false;
+	}
 }
 
 
@@ -149,9 +174,10 @@ function OnGUI() {
 	var x: int;
 	var y: int;
 	var originalColor: Color = GUI.color;
+
 	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
 	if(inTightRopeArea){
-		if(razerHydra.balance >= 20) {
+		if(razerHydra.balance >= 10) {
 			x = Screen.width*0.25 - Screen.height/6;
 			y = Screen.height/2 - Screen.height/6;
 			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
@@ -159,7 +185,7 @@ function OnGUI() {
 			y = Screen.height/2 - Screen.height/6;
 			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
 		}
-		if(razerHydra.balance <= -20) {
+		if(razerHydra.balance <= -10) {
 			x = Screen.width*0.25 - Screen.height/6;
 			y = Screen.height/2 - Screen.height/6;
 			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
@@ -168,7 +194,19 @@ function OnGUI() {
 			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
 		}
 	} 
-	 GUI.color = originalColor;
+	GUI.color = originalColor;
+	var labWidth: float = Screen.width/2;
+	var labHeight: float = Screen.height/4;
+	var xPos: float = Screen.width/4;
+	var yPos: float = Screen.height/8;
+	var gs = new GUIStyle(GUI.skin.label);
+	gs.fontSize = 24;
+	gs.fontStyle = FontStyle.Bold;
+	gs.alignment = TextAnchor.MiddleCenter;
+
+	if(canGraspJavelin) {
+		GUI.Label(new Rect(xPos, yPos, labWidth, labHeight),"Appuyer sur la touche 1 de la manette gauche pour saisir le javelot", gs);
+	}
 }
 
 
