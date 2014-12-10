@@ -5,7 +5,7 @@ Modified version of the FPSInputController from CharacterController
 private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
 public var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
-public var tightRopeSpeed : float = 0.5f;//movement speed while on a tight rope
+public var tightRopeSpeed : float = 0.1f;//movement speed while on a tight rope
 public var VREnabled : boolean = true;//use VR controllers ?
 
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
@@ -17,7 +17,7 @@ private var currentTightRope : GameObject;
 private var birdStartPoint;
 private var isSameDir : boolean;
 private var razerHydra;
-private var razerJumpAccel : float = 0.5f;
+private var razerJumpAccel : float = 2;
 private var footstepDelay : float = 0f;
 
 public var footsteps : AudioSource;
@@ -27,8 +27,10 @@ public var arrowBottom: Texture;
 
 private var canGraspJavelin: boolean = false;
 private var javelin = null;
-public var javelinPrefab = gameObject;
+public var javelinPrefab : GameObject;
+private var index:float;
 
+private var CamPosInit: Vector3 = GameObject.Find("Main Camera").transform.position;
 /*
 updates the player's arm balancing
 */
@@ -61,12 +63,15 @@ function Update () {
 	var directionLength : float;
 	
 	if(inTightRopeArea) {
-		directionVector = Vector3.forward * tightRopeSpeed;	
+	index += Time.deltaTime;
+		directionVector = Vector3.forward * tightRopeSpeed;
+		GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
 		calculateBalance();
 	}
 	
 	else {
-		
+		if(GameObject.Find("Main Camera").transform.localPosition != CamPosInit)
+			GameObject.Find("Main Camera").transform.localPosition = CamPosInit;
 		if(!VREnabled) {
 			directionVector = new Vector3(Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
 		}
@@ -80,12 +85,12 @@ function Update () {
 		}
 		
 		else {
-			motor.inputJump = razerHydra.leftTrackerAccel.y > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
+			motor.inputJump = razerHydra.leftTrackerAccel.x > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
 		}
 	}
 	
 		if(canGraspJavelin) {
-			if(Input.GetKey("g")/*razerHydra.button1*/) {
+			if(razerHydra.button1) {
 				if(javelin){
 					Destroy(javelin);
 					var holdedJavelin: GameObject = Instantiate(javelinPrefab,transform.position + Vector3(0,0,1) ,transform.rotation* Quaternion.Euler(0,0,90));
@@ -114,7 +119,6 @@ function Update () {
 		directionVector = directionVector * directionLength;
 	}
 	
-	Debug.Log(directionVector);
 	
 	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
 		footstepDelay += Time.deltaTime;
@@ -165,6 +169,7 @@ function OnTriggerExit(trigger : Collider) {
 		javelin = null;
 		canGraspJavelin = false;
 	}
+	
 }
 
 
@@ -178,20 +183,20 @@ function OnGUI() {
 	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
 	if(inTightRopeArea){
 		if(razerHydra.balance >= 10) {
-			x = Screen.width*0.25 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
-			x = Screen.width*0.75 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
+			x = 0;//Screen.width*0.25 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
 		}
 		if(razerHydra.balance <= -10) {
-			x = Screen.width*0.25 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
-			x = Screen.width*0.75 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+			x = 0;//Screen.width*0.25 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
+			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
 		}
 	} 
 	GUI.color = originalColor;
@@ -213,8 +218,9 @@ function OnGUI() {
 function OnControllerColliderHit(hit: ControllerColliderHit){
 
 	if(hit.gameObject.name == "Sol")
-	 	transform.localPosition = Vector3(0, 0, 0);
+	 	transform.position = Vector3(-42.62825, 49.11555, -147.6305);
 }
+
 
 // Require a character controller to be attached to the same game object
 @script RequireComponent (CharacterMotor)
