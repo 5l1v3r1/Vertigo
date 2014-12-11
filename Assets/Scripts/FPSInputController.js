@@ -5,7 +5,7 @@ Modified version of the FPSInputController from CharacterController
 private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
 public var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
-public var tightRopeSpeed : float = 0.2f;//movement speed while on a tight rope
+public var tightRopeSpeed : float = 0.1f;//movement speed while on a tight rope
 public var VREnabled : boolean = true;//use VR controllers ?
 
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
@@ -28,6 +28,12 @@ public var footsteps : AudioSource;
 public var arrowTop: Texture;
 public var arrowBottom: Texture;
 
+private var canGraspJavelin: boolean = false;
+private var javelin = null;
+public var javelinPrefab : GameObject;
+private var index:float;
+
+private var CamPosInit: Vector3 = GameObject.Find("Main Camera").transform.position;
 /*
 updates the player's arm balancing
 */
@@ -52,14 +58,17 @@ function Update () {
 	var directionLength : float;
 	
 	if(inTightRopeArea) {
-		directionVector = Vector3.forward * tightRopeSpeed;	
+	index += Time.deltaTime;
+		directionVector = Vector3.forward * tightRopeSpeed;
+		GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
 		calculateBalance();
 	}
 
 
 	
 	else {
-		
+		if(GameObject.Find("Main Camera").transform.localPosition != CamPosInit)
+			GameObject.Find("Main Camera").transform.localPosition = CamPosInit;
 		if(!VREnabled) {
 			directionVector = new Vector3(Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
 		}
@@ -73,22 +82,22 @@ function Update () {
 		}
 		
 		else {
-			//motor.inputJump = razerHydra.leftTrackerAccel.y > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
+			motor.inputJump = razerHydra.leftTrackerAccel.x > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
 		}
+	}
+	
 		if(canGraspJavelin) {
-			if(Input.GetKey("g")/*razerHydra.button1*/) {
-				if(javelin){ 
+			if(razerHydra.button1) {
+				if(javelin){
 					Destroy(javelin);
-				 	var holdedJavelin: GameObject = Instantiate(javelinPrefab,transform.position + Vector3(0,0,1) ,transform.rotation* Quaternion.Euler(0,0,90));
+					var holdedJavelin: GameObject = Instantiate(javelinPrefab,transform.position + Vector3(0,0,1) ,transform.rotation* Quaternion.Euler(0,0,90));
 					Destroy (holdedJavelin.GetComponent("Capsule Collider"));
 					holdedJavelin.transform.parent = gameObject.transform;
 					holdedJavelin.transform.localPosition = Vector3(0,0,1);
 					canGraspJavelin = false;
 				}
-				
 			}
 		}
-	}
 	
 	if (directionVector != Vector3.zero) {
 		// Get the length of the directon vector and then normalize it
@@ -107,7 +116,6 @@ function Update () {
 		directionVector = directionVector * directionLength;
 	}
 	
-	//Debug.Log(directionVector);
 	
 	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
 		footstepDelay += Time.deltaTime;
@@ -141,7 +149,6 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "Javelin") {
 		javelin = trigger.gameObject;
 		canGraspJavelin = true;
-	}		
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -167,48 +174,47 @@ function OnGUI() {
 	var x: int;
 	var y: int;
 	var originalColor: Color = GUI.color;
+
 	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
 	if(inTightRopeArea){
-		if(razerHydra.balance >= 20) {
-			x = Screen.width*0.25 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
-			x = Screen.width*0.75 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
+		if(razerHydra.balance >= 10) {
+			x = 0;//Screen.width*0.25 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
 		}
-		if(razerHydra.balance <= -20) {
-			x = Screen.width*0.25 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowTop,ScaleMode.ScaleToFit, true, 0);
-			x = Screen.width*0.75 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/6;
-			GUI.DrawTexture(Rect(x,y,Screen.height/3,Screen.height/3), arrowBottom, ScaleMode.ScaleToFit, true, 0);
+		if(razerHydra.balance <= -10) {
+			x = 0;//Screen.width*0.25 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
+			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
+			y = Screen.height/2 - Screen.height/8;
+			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
 		}
 	} 
-	 GUI.color = originalColor;
-	 var labWidth: float = Screen.width/2;
+	GUI.color = originalColor;
+	var labWidth: float = Screen.width/2;
 	var labHeight: float = Screen.height/4;
 	var xPos: float = Screen.width/4;
-	var yPos: float = Screen.height/8; 
+	var yPos: float = Screen.height/8;
 	var gs = new GUIStyle(GUI.skin.label);
 	gs.fontSize = 24;
 	gs.fontStyle = FontStyle.Bold;
 	gs.alignment = TextAnchor.MiddleCenter;
 
-		if(canGraspJavelin) {
-			GUI.Label(new Rect(xPos, yPos, labWidth, labHeight),"Appuyer sur la touche 1 de la manette gauche pour saisir le javelot", gs);
-	 	}
-}
-function GetInTightRopeArea(){
-	return inTightRopeArea;
+	if(canGraspJavelin) {
+		GUI.Label(new Rect(xPos, yPos, labWidth, labHeight),"Appuyer sur la touche 1 de la manette gauche pour saisir le javelot", gs);
+	}
 }
 
 function OnControllerColliderHit(hit: ControllerColliderHit){
 
 	if(hit.gameObject.name == "Sol")
-		transform.localPosition = Vector3(0, 0, 0);
+	 	transform.position = Vector3(-42.62825, 49.11555, -147.6305);
 }
+
 
 // Require a character controller to be attached to the same game object
 @script RequireComponent (CharacterMotor)

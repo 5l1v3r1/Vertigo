@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: fb7e523a793e88440aeeb2ce7eab5fa1
+=======
+guid: 9e54c61293e01714abb9844f82e4aeb1
+>>>>>>> oculus
 TextureImporter:
   fileIDToRecycleName: {}
   serializedVersion: 2
