@@ -37,7 +37,7 @@ private var leftY;
 private var rightY;
 
 private var CamPosInit: Vector3;
-public var climbDistance:float = 0.1;
+public var climbDistance:float = 0.6;
 public var climbDelta : float = 20;
 public var nextBalance :float = climbDelta;
 public var justClimbed : boolean = false;
@@ -145,15 +145,14 @@ function Update () {
 		} 
 	}*/
 	if(canGraspRope){
-		Debug.Log("CANGRASP");
+
 		if(justClimbed) {
 			justClimbed = false;
 		}
 		else if(nextBalance > 0 && razerHydra.balance >= nextBalance ||
 			nextBalance < 0 && razerHydra.balance <= nextBalance) {
-			Debug.Log("GNEEEE");
 			nextBalance = -nextBalance;
-			transform.Translate(climbDistance * Vector3.up);
+			transform.Translate(/*climbDistance*/Vector3.up);
 			justClimbed = true;
 		}
 	}
@@ -208,6 +207,8 @@ function OnTriggerEnter(trigger : Collider) {
 	
 	if(trigger.tag == "Rope") {
 		canGraspRope = true;
+		GetComponent(CharacterMotor).movement.gravity = 0;
+
 	}
 }
 
@@ -223,6 +224,7 @@ function OnTriggerExit(trigger : Collider) {
 	}
 	if(trigger.tag == "Rope") {
 		canGraspRope = false;
+		GetComponent(CharacterMotor).movement.gravity = 20;
 	}
 	
 }
