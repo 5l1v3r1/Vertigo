@@ -27,11 +27,7 @@ function OnGUI() {
 	yPos = Screen.height*5/9;
 	
 	if(GUI.Button(Rect(xPos,yPos, buttonWidth,buttonHeight), "PLAY", gs)) {
-<<<<<<< HEAD
-		Application.LoadLevel("Zone1");
-=======
 		Application.LoadLevel("Zone0");
->>>>>>> oculus
 	}
 		
 	xPos = 5*Screen.width/9;

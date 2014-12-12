@@ -21,16 +21,12 @@ private var razerJumpAccel : float = 0.7f;
 private var footstepDelay : float = 0f;
 private var	canGraspJavelin: boolean = false;
 private var javelin = null;
-public var javelinPrefab = gameObject;
 
 public var footsteps : AudioSource;
 
 public var arrowTop: Texture;
 public var arrowBottom: Texture;
 
-private var canGraspJavelin: boolean = false;
-private var javelin = null;
-public var javelinPrefab : GameObject;
 private var index:float;
 
 private var canGraspRope: boolean = false;
@@ -149,11 +145,13 @@ function Update () {
 		} 
 	}*/
 	if(canGraspRope){
+		Debug.Log("CANGRASP");
 		if(justClimbed) {
 			justClimbed = false;
 		}
 		else if(nextBalance > 0 && razerHydra.balance >= nextBalance ||
 			nextBalance < 0 && razerHydra.balance <= nextBalance) {
+			Debug.Log("GNEEEE");
 			nextBalance = -nextBalance;
 			transform.Translate(climbDistance * Vector3.up);
 			justClimbed = true;
@@ -207,10 +205,6 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 	}
-	if(trigger.tag == "Javelin") {
-		javelin = trigger.gameObject;
-		canGraspJavelin = true;
-	}
 	
 	if(trigger.tag == "Rope") {
 		canGraspRope = true;
@@ -226,10 +220,6 @@ function OnTriggerExit(trigger : Collider) {
 	}
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Stop();
-	}
-	if(trigger.tag == "Javelin") {
-		javelin = null;
-		canGraspJavelin = false;
 	}
 	if(trigger.tag == "Rope") {
 		canGraspRope = false;
