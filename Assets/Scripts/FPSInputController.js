@@ -38,6 +38,10 @@ private var leftY;
 private var rightY;
 
 private var CamPosInit: Vector3;
+public var climbDistance:float = 0.1;
+public var climbDelta : float = 20;
+public var nextBalance :float = climbDelta;
+public var justClimbed : boolean = false;
 /*
 updates the player's arm balancing
 */
@@ -101,7 +105,7 @@ function Update () {
 	var leftPos = razerHydra.leftTrackerPos;
 	var rightPos = razerHydra.rightTrackerPos;
 		
-	if(canGraspRope) {
+	/*if(canGraspRope) {
 		if(razerHydra.gachetteGauche && razerHydra.gachetteDroite) {
 			twoHand = true;
 			if(areSavedPos == true && oneHand == true) {
@@ -146,6 +150,17 @@ function Update () {
 			oneHand = false;
 			twoHand = false;
 		} 
+	}*/
+	if(canGraspRope){
+		if(justClimbed) {
+			justClimbed = false;
+		}
+		else if(nextBalance > 0 && razerHydra.balance >= nextBalance ||
+			nextBalance < 0 && razerHydra.balance <= nextBalance) {
+			nextBalance = -nextBalance;
+			transform.Translate(climbDistance * Vector3.up);
+			justClimbed = true;
+		}
 	}
 	
 	if (directionVector != Vector3.zero) {
