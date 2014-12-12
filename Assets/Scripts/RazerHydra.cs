@@ -18,6 +18,8 @@ public class RazerHydra : MonoBehaviour {
 	public float balance;
 
 	public bool button1 = false;
+	public bool gachetteGauche = false;
+	public bool gachetteDroite = false;
 
 	vrJoystick leftJoystick, rightJoystick;
 	vrTracker leftTracker, rightTracker;
@@ -29,6 +31,9 @@ public class RazerHydra : MonoBehaviour {
 		leftTracker = MiddleVR.VRDeviceMgr.GetTracker (0);
 		rightTracker = MiddleVR.VRDeviceMgr.GetTracker (1);
 		button1 = leftJoystick.IsButtonPressed (1);
+		gachetteGauche = leftJoystick.IsButtonPressed (0);
+		gachetteDroite = rightJoystick.IsButtonPressed (0);
+
 
 
 	}
@@ -51,6 +56,8 @@ public class RazerHydra : MonoBehaviour {
 		lastLeftTrackerPos = leftTrackerPos;
 		lastRightTrackerPos = rightTrackerPos;
 		button1 = leftJoystick.IsButtonPressed (1);
-
+		gachetteGauche = leftJoystick.IsButtonPressed (0);
+		gachetteDroite = rightJoystick.IsButtonPressed (0);
+		
 	}
 }

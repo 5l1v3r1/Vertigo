@@ -33,7 +33,14 @@ private var javelin = null;
 public var javelinPrefab : GameObject;
 private var index:float;
 
-private var CamPosInit: Vector3 = GameObject.Find("Main Camera").transform.position;
+private var canGraspRope: boolean = false;
+private var oneHand: boolean = false;
+private var twoHand: boolean =false;
+private var areSavedPos : boolean = false;
+private var leftY;
+private var rightY;
+
+private var CamPosInit: Vector3;
 /*
 updates the player's arm balancing
 */
@@ -47,6 +54,7 @@ function calculateBalance(){
 
 // Use this for initialization
 function Awake () {
+	CamPosInit = GameObject.Find("Main Camera").transform.position;
 	motor = GetComponent(CharacterMotor);
 	razerHydra = GetComponent("RazerHydra");
 }
@@ -69,6 +77,7 @@ function Update () {
 	else {
 		if(GameObject.Find("Main Camera").transform.localPosition != CamPosInit)
 			GameObject.Find("Main Camera").transform.localPosition = CamPosInit;
+		
 		if(!VREnabled) {
 			directionVector = new Vector3(Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
 		}
@@ -85,19 +94,56 @@ function Update () {
 			motor.inputJump = razerHydra.leftTrackerAccel.x > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
 		}
 	}
-	
-		if(canGraspJavelin) {
-			if(razerHydra.button1) {
-				if(javelin){
-					Destroy(javelin);
-					var holdedJavelin: GameObject = Instantiate(javelinPrefab,transform.position + Vector3(0,0,1) ,transform.rotation* Quaternion.Euler(0,0,90));
-					Destroy (holdedJavelin.GetComponent("Capsule Collider"));
-					holdedJavelin.transform.parent = gameObject.transform;
-					holdedJavelin.transform.localPosition = Vector3(0,0,1);
-					canGraspJavelin = false;
+		
+	var leftPos = razerHydra.leftTrackerPos;
+	var rightPos = razerHydra.rightTrackerPos;
+		
+	if(canGraspRope) {
+		if(razerHydra.gachetteGauche && razerHydra.gachetteDroite) {
+			twoHand = true;
+			if(areSavedPos == true && oneHand == true) {
+				areSavedPos = false;
+				oneHand = false;
+
+				if((leftPos.y - leftY.y) > 0.3) {
+
+					transform.position = transform.position +Vector3.up;
+					
+					//GetComponent(CharacterController).Move(Vector3.up*5);
+					GetComponent(CharacterController).movement.gravity = 0;
 				}
+				if((rightPos.y - rightY.y) > 0.3) {
+
+					transform.position = transform.position +Vector3.up;
+					GetComponent(CharacterController).movement.gravity = 0;
+
+					//GetComponent(CharacterController).Move(Vector3.up*5);
+					//GetComponent(CharacterController).movement.gravity = 0;
+				}
+				
 			}
 		}
+			
+		if((razerHydra.gachetteGauche || razerHydra.gachetteDroite)&& (razerHydra.gachetteGauche != razerHydra.gachetteDroite)) {
+				
+			oneHand = true;
+			if(twoHand){
+				twoHand = false;
+				if(areSavedPos == false){
+					leftY = leftPos;
+					rightY = rightPos;
+					areSavedPos = true;
+				}
+			}
+			else{
+				Debug.LogWarning("Une seule main attachee");
+			}
+		}
+		if(!razerHydra.gachetteGauche && ! razerHydra.gachetteDroite) {
+			oneHand = false;
+			twoHand = false;
+		} 
+	}
 	
 	if (directionVector != Vector3.zero) {
 		// Get the length of the directon vector and then normalize it
@@ -149,6 +195,11 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "Javelin") {
 		javelin = trigger.gameObject;
 		canGraspJavelin = true;
+	}
+	
+	if(trigger.tag == "Rope") {
+		canGraspRope = true;
+	}
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -165,6 +216,10 @@ function OnTriggerExit(trigger : Collider) {
 		javelin = null;
 		canGraspJavelin = false;
 	}
+	if(trigger.tag == "Rope") {
+		canGraspRope = false;
+	}
+	
 }
 
 
