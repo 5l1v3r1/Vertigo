@@ -29,7 +29,7 @@ public var arrowBottom: Texture;
 
 private var index:float;
 
-private var canGraspRope: boolean = false;
+private var inClimbingArea: boolean = false;
 private var oneHand: boolean = false;
 private var twoHand: boolean =false;
 private var areSavedPos : boolean = false;
@@ -37,10 +37,10 @@ private var leftY;
 private var rightY;
 
 private var CamPosInit: Vector3;
-public var climbDistance:float = 0.6;
-public var climbDelta : float = 20;
-public var nextBalance :float = climbDelta;
-public var justClimbed : boolean = false;
+private var climbDistance : float = 0.8f;
+private var climbDelta : float = 5f;
+private var nextBalance :float = climbDelta;
+private var justClimbed : boolean = false;
 /*
 updates the player's arm balancing
 */
@@ -61,10 +61,10 @@ function Awake () {
 
 // Update is called once per frame
 function Update () {
-	// Get the input vector from keyboard or analog stick
 	var directionVector : Vector3;
 	var directionLength : float;
 	
+	// Movement
 	if(inTightRopeArea) {
 	index += Time.deltaTime;
 		directionVector = Vector3.forward * tightRopeSpeed;
@@ -92,68 +92,6 @@ function Update () {
 			motor.inputJump = razerHydra.leftTrackerAccel.x > razerJumpAccel && razerHydra.rightTrackerAccel.y > razerJumpAccel;
 		}
 	}
-		
-	var leftPos = razerHydra.leftTrackerPos;
-	var rightPos = razerHydra.rightTrackerPos;
-		
-	/*if(canGraspRope) {
-		if(razerHydra.gachetteGauche && razerHydra.gachetteDroite) {
-			twoHand = true;
-			if(areSavedPos == true && oneHand == true) {
-				areSavedPos = false;
-				oneHand = false;
-
-				if((leftPos.y - leftY.y) > 0.3) {
-
-					transform.position = transform.position +Vector3.up;
-					
-					//GetComponent(CharacterController).Move(Vector3.up*5);
-					GetComponent(CharacterController).movement.gravity = 0;
-				}
-				if((rightPos.y - rightY.y) > 0.3) {
-
-					transform.position = transform.position +Vector3.up;
-					GetComponent(CharacterController).movement.gravity = 0;
-
-					//GetComponent(CharacterController).Move(Vector3.up*5);
-					//GetComponent(CharacterController).movement.gravity = 0;
-				}
-				
-			}
-		}
-			
-		if((razerHydra.gachetteGauche || razerHydra.gachetteDroite)&& (razerHydra.gachetteGauche != razerHydra.gachetteDroite)) {
-				
-			oneHand = true;
-			if(twoHand){
-				twoHand = false;
-				if(areSavedPos == false){
-					leftY = leftPos;
-					rightY = rightPos;
-					areSavedPos = true;
-				}
-			}
-			else{
-				Debug.LogWarning("Une seule main attachee");
-			}
-		}
-		if(!razerHydra.gachetteGauche && ! razerHydra.gachetteDroite) {
-			oneHand = false;
-			twoHand = false;
-		} 
-	}*/
-	if(canGraspRope){
-
-		if(justClimbed) {
-			justClimbed = false;
-		}
-		else if(nextBalance > 0 && razerHydra.balance >= nextBalance ||
-			nextBalance < 0 && razerHydra.balance <= nextBalance) {
-			nextBalance = -nextBalance;
-			transform.Translate(/*climbDistance*/Vector3.up);
-			justClimbed = true;
-		}
-	}
 	
 	if (directionVector != Vector3.zero) {
 		// Get the length of the directon vector and then normalize it
@@ -172,6 +110,8 @@ function Update () {
 		directionVector = directionVector * directionLength;
 	}
 	
+	// Apply the direction to the CharacterMotor
+	motor.inputMoveDirection = transform.rotation * directionVector;
 	
 	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero) {
 		footstepDelay += Time.deltaTime;
@@ -181,9 +121,21 @@ function Update () {
 		}
 	}
 	
-	// Apply the direction to the CharacterMotor
-	motor.inputMoveDirection = transform.rotation * directionVector;
-	
+	// Climbing
+	var leftPos = razerHydra.leftTrackerPos;
+	var rightPos = razerHydra.rightTrackerPos;
+		
+	if(inClimbingArea){
+		if(justClimbed) {
+			justClimbed = false;
+		}
+		else if(nextBalance > 0 && razerHydra.balance >= nextBalance ||
+			nextBalance < 0 && razerHydra.balance <= nextBalance) {
+			nextBalance = -nextBalance;
+			transform.Translate(climbDistance * Vector3.up);
+			justClimbed = true;
+		}
+	}
 }
 
 function OnTriggerEnter(trigger : Collider) {
@@ -197,10 +149,9 @@ function OnTriggerEnter(trigger : Collider) {
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 	}
 	
-	if(trigger.tag == "Rope") {
-		canGraspRope = true;
+	if(trigger.tag == "ClimbingArea") {
+		inClimbingArea = true;
 		GetComponent(CharacterMotor).movement.gravity = 0;
-
 	}
 }
 
@@ -214,11 +165,11 @@ function OnTriggerExit(trigger : Collider) {
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Stop();
 	}
-	if(trigger.tag == "Rope") {
-		canGraspRope = false;
+	if(trigger.tag == "ClimbingArea") {
+		inClimbingArea = false;
 		GetComponent(CharacterMotor).movement.gravity = 20;
+		transform.position = trigger.transform.FindChild("topPos").position;
 	}
-	
 }
 
 
