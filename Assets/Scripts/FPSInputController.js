@@ -4,8 +4,8 @@ Modified version of the FPSInputController from CharacterController
 
 private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
-public var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
-public var tightRopeSpeed : float = 0.1f;//movement speed while on a tight rope
+private var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
+private var tightRopeSpeed : float = 0.1f;//movement speed while on a tight rope
 public var VREnabled : boolean = true;//use VR controllers ?
 
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
@@ -153,6 +153,10 @@ function OnTriggerEnter(trigger : Collider) {
 		inClimbingArea = true;
 		GetComponent(CharacterMotor).movement.gravity = 0;
 	}
+	
+	if(trigger.tag == "TopOfClimbingArea" && inClimbingArea) {
+		transform.position = trigger.transform.position;
+	}
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -168,10 +172,8 @@ function OnTriggerExit(trigger : Collider) {
 	if(trigger.tag == "ClimbingArea") {
 		inClimbingArea = false;
 		GetComponent(CharacterMotor).movement.gravity = 20;
-		transform.position = trigger.transform.FindChild("topPos").position;
 	}
 }
-
 
 function OnGUI() {
 
