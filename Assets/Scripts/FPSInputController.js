@@ -17,7 +17,7 @@ private var currentTightRope : GameObject;
 private var birdStartPoint;
 private var isSameDir : boolean;
 private var razerHydra;
-private var razerJumpAccel : float = 0.7f;
+private var razerJumpAccel : float = 7f;
 private var footstepDelay : float = 0f;
 private var	canGraspJavelin: boolean = false;
 private var javelin = null;
@@ -71,8 +71,6 @@ function Update () {
 		GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
 		calculateBalance();
 	}
-
-
 	
 	else {
 		if(GameObject.Find("Main Camera").transform.localPosition != CamPosInit)
@@ -175,18 +173,12 @@ function Update () {
 	}
 	
 	
-	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero && !footsteps.isPlaying) {
+	if(!inTightRopeArea && motor.grounded && directionVector != Vector3.zero) {
 		footstepDelay += Time.deltaTime;
-		if(footstepDelay > 0.5f) {
+		if(footstepDelay > 0.3f) {
 			footsteps.Play();
-			//adapt to player speed when using Razer Hydra controllers
-			//footsteps.pitch = directionVector.z * 2;
 			footstepDelay = 0f;
 		}
-	}
-	
-	else if(inTightRopeArea || !motor.grounded || directionVector == Vector3.zero && footsteps.isPlaying) {
-		footsteps.Stop();
 	}
 	
 	// Apply the direction to the CharacterMotor

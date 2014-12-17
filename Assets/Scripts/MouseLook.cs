@@ -58,7 +58,7 @@ public class MouseLook : MonoBehaviour {
 			if(!VREnabled)
 				rotationX = transform.localEulerAngles.y + Input.GetAxis("Horizontal") * sensitivityX;
 			else
-				rotationX = transform.localEulerAngles.y + razerHydra.rightJoyInput.x;
+				rotationX = transform.localEulerAngles.y + razerHydra.rightJoyInput.x * sensitivityX;
 			
 			transform.localEulerAngles = new Vector3(0, rotationX, 0);
 		}
