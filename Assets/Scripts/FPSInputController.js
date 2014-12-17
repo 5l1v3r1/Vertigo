@@ -2,16 +2,21 @@
 Modified version of the FPSInputController from CharacterController
 */
 
+public var VREnabled : boolean = true;//use VR controllers ?
+public var birdPrefab : GameObject;
+public var footsteps : AudioSource;
+public var arrowTop: Texture;
+public var arrowBottom : Texture;
+public var metalSound : AudioSource;
+
 private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
-private var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right)
-private var tightRopeSpeed : float = 0.1f;//movement speed while on a tight rope
-public var VREnabled : boolean = true;//use VR controllers ?
+ /*private var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right) */
+private var tightRopeSpeed : float = 0.5f;//movement speed while on a tight rope
 
 private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
 
 private var isBirdGenerationStarted : boolean = false;
-public var birdPrefab : GameObject;
 private var birdRotation;
 private var currentTightRope : GameObject;
 private var birdStartPoint;
@@ -21,11 +26,6 @@ private var razerJumpAccel : float = 7f;
 private var footstepDelay : float = 0f;
 private var	canGraspJavelin: boolean = false;
 private var javelin = null;
-
-public var footsteps : AudioSource;
-
-public var arrowTop: Texture;
-public var arrowBottom: Texture;
 
 private var index:float;
 
@@ -59,14 +59,13 @@ function Awake () {
 	razerHydra = GetComponent("RazerHydra");
 }
 
-// Update is called once per frame
-function Update () {
-	var directionVector : Vector3;
+function playerMovement() {
+		var directionVector : Vector3;
 	var directionLength : float;
 	
 	// Movement
 	if(inTightRopeArea) {
-	index += Time.deltaTime;
+		index += Time.deltaTime;
 		directionVector = Vector3.forward * tightRopeSpeed;
 		GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
 		calculateBalance();
@@ -120,7 +119,9 @@ function Update () {
 			footstepDelay = 0f;
 		}
 	}
-	
+}
+
+function climbing() {
 	// Climbing
 	var leftPos = razerHydra.leftTrackerPos;
 	var rightPos = razerHydra.rightTrackerPos;
@@ -134,19 +135,34 @@ function Update () {
 			nextBalance = -nextBalance;
 			transform.Translate(climbDistance * Vector3.up);
 			justClimbed = true;
+			metalSound.Play();
 		}
 	}
 }
 
+// Update is called once per frame
+function Update () {
+	
+	// handles running, jumping and footsteps
+	playerMovement();
+	
+	// handles ladder climbing 
+	climbing();
+}
+
 function OnTriggerEnter(trigger : Collider) {
+	
 	if(trigger.tag == "TightRopeArea") {
 		inTightRopeArea = true;
 	}
+	
 	if(trigger.tag == "BirdTrigger"){
 		trigger.GetComponent("GenerateBird").GenerateBirds();
 	}
+	
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Play();
+		trigger.GetComponentInChildren(AudioSource).Play();	
 	}
 	
 	if(trigger.tag == "ClimbingArea") {
@@ -154,21 +170,25 @@ function OnTriggerEnter(trigger : Collider) {
 		GetComponent(CharacterMotor).movement.gravity = 0;
 	}
 	
+	// reached the top of the climbing area: teleport to the roof
 	if(trigger.tag == "TopOfClimbingArea" && inClimbingArea) {
 		transform.position = trigger.transform.position;
 	}
 }
 
 function OnTriggerExit(trigger : Collider) {
+
 	if(trigger.tag == "TightRopeArea") {
 		inTightRopeArea = false;
 		razerHydra.balance = 0;
 		transform.localEulerAngles.z = 0;
 		transform.localEulerAngles.x = 0;
 	}
+	
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Stop();
 	}
+	
 	if(trigger.tag == "ClimbingArea") {
 		inClimbingArea = false;
 		GetComponent(CharacterMotor).movement.gravity = 20;
