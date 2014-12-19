@@ -34,8 +34,6 @@ public class RazerHydra : MonoBehaviour {
 		gachetteGauche = leftJoystick.IsButtonPressed (0);
 		gachetteDroite = rightJoystick.IsButtonPressed (0);
 
-
-
 	}
 
 	void Update () {
@@ -58,6 +56,12 @@ public class RazerHydra : MonoBehaviour {
 		button1 = leftJoystick.IsButtonPressed (1);
 		gachetteGauche = leftJoystick.IsButtonPressed (0);
 		gachetteDroite = rightJoystick.IsButtonPressed (0);
-		
+
+		float distanceRazer = leftTrackerPos.x - rightTrackerPos.x;
+	}
+
+	// Checks if player holds the Hydras far enough from each other
+	bool armsApart() {
+		return Vector3.Distance (leftTrackerPos, rightTrackerPos) > 0.5f;
 	}
 }

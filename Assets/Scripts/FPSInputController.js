@@ -38,7 +38,7 @@ private var rightY;
 
 private var CamPosInit: Vector3;
 private var climbDistance : float = 0.8f;
-private var climbDelta : float = 5f;
+private var climbDelta : float = 1f;
 private var nextBalance :float = climbDelta;
 private var justClimbed : boolean = false;
 /*
@@ -60,15 +60,26 @@ function Awake () {
 }
 
 function playerMovement() {
-		var directionVector : Vector3;
+	var directionVector : Vector3;
 	var directionLength : float;
 	
 	// Movement
 	if(inTightRopeArea) {
-		index += Time.deltaTime;
-		directionVector = Vector3.forward * tightRopeSpeed;
-		GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
-		calculateBalance();
+		// The player holds the hydras correctly
+		if(razerHydra.armsApart()) {
+			index += Time.deltaTime;
+			directionVector = Vector3.forward * tightRopeSpeed;
+			GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
+			calculateBalance();
+		}
+		// The player holds the hydras too close from each other, we make him slide to the side of the tight rope area where he is currently leaning to
+		else {
+			if (razerHydra.balance < 0)
+				directionVector = Vector3.left * tightRopeSpeed;
+			else
+				directionVector = Vector3.right * tightRopeSpeed;
+		}
+		
 	}
 	
 	else {
@@ -162,7 +173,8 @@ function OnTriggerEnter(trigger : Collider) {
 	
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Play();
-		trigger.GetComponentInChildren(AudioSource).Play();	
+		trigger.GetComponentInChildren(AudioSource).Play();
+		Debug.Log("entred");	
 	}
 	
 	if(trigger.tag == "ClimbingArea") {
@@ -196,7 +208,7 @@ function OnTriggerExit(trigger : Collider) {
 }
 
 function OnGUI() {
-
+	
 	/* Visual metaphors to help the player find his stability*/
 	var x: int;
 	var y: int;
@@ -220,7 +232,7 @@ function OnGUI() {
 			y = Screen.height/2 - Screen.height/8;
 			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
 		}
-	} 
+	}
 	GUI.color = originalColor;
 	var labWidth: float = Screen.width/2;
 	var labHeight: float = Screen.height/4;
