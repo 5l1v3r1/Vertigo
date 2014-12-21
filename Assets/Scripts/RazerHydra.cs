@@ -16,6 +16,7 @@ public class RazerHydra : MonoBehaviour {
 
 	//equilibrium between both trackers
 	public float balance;
+	public float balanceZ;
 
 	public bool button1 = false;
 	public bool gachetteGauche = false;
@@ -50,6 +51,8 @@ public class RazerHydra : MonoBehaviour {
 		rightTrackerAccel = (rightTrackerPos - lastRightTrackerPos) * Time.deltaTime * 100000f;
 		
 		balance = Mathf.Clamp ((leftTrackerPos.y - rightTrackerPos.y) * 100f, -30f, 30f);
+		balanceZ = Mathf.Clamp ((leftTrackerPos.z - rightTrackerPos.z) * 100f, -30f, 30f);
+
 		
 		lastLeftTrackerPos = leftTrackerPos;
 		lastRightTrackerPos = rightTrackerPos;

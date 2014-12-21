@@ -36,6 +36,9 @@ private var areSavedPos : boolean = false;
 private var leftY;
 private var rightY;
 
+private var inMonkeyBarArea: boolean = false;
+
+
 private var CamPosInit: Vector3;
 private var climbDistance : float = 0.8f;
 private var climbDelta : float = 1f;
@@ -54,7 +57,7 @@ function calculateBalance(){
 
 // Use this for initialization
 function Awake () {
-	CamPosInit = GameObject.Find("Main Camera").transform.position;
+	CamPosInit = GameObject.Find("CamPos").transform.localPosition;
 	motor = GetComponent(CharacterMotor);
 	razerHydra = GetComponent("RazerHydra");
 }
@@ -69,7 +72,7 @@ function playerMovement() {
 		if(razerHydra.armsApart()) {
 			index += Time.deltaTime;
 			directionVector = Vector3.forward * tightRopeSpeed;
-			GameObject.Find("Main Camera").transform.localPosition= new Vector3(0,0.02*Mathf.Abs (5*Mathf.Sin (2*index)),0);
+			GameObject.Find("CamPos").transform.localPosition= CamPosInit + Vector3(0,0.03*Mathf.Abs (5*Mathf.Sin (2*index)),0);
 			calculateBalance();
 		}
 		// The player holds the hydras too close from each other, we make him slide to the side of the tight rope area where he is currently leaning to
@@ -83,8 +86,8 @@ function playerMovement() {
 	}
 	
 	else {
-		if(GameObject.Find("Main Camera").transform.localPosition != CamPosInit)
-			GameObject.Find("Main Camera").transform.localPosition = CamPosInit;
+		if(GameObject.Find("CamPos").transform.localPosition != CamPosInit)
+			GameObject.Find("CamPos").transform.localPosition = CamPosInit;
 		
 		if(!VREnabled) {
 			directionVector = new Vector3(Input.GetAxis("MovementX"), 0, Input.GetAxis("MovementY"));
@@ -151,6 +154,39 @@ function climbing() {
 	}
 }
 
+private var grasp : boolean = false;
+function monkeyMoving(){
+
+	var leftPos = razerHydra.leftTrackerPos;
+	var rightPos = razerHydra.rightTrackerPos;
+	//var rightBut = razerHydra.gachetteGauche;
+	//var leftBut = razerHydra.gachetteDroite;
+		
+	if(inMonkeyBarArea){
+		
+		if(justClimbed) {
+			GetComponent(CharacterMotor).movement.gravity = 0;
+			justClimbed = false;
+		}
+		else if((nextBalance > 0 && razerHydra.balanceZ >= nextBalance ||
+			nextBalance < 0 && razerHydra.balanceZ <= nextBalance) && grasp) {
+			nextBalance = -nextBalance;
+			transform.Translate(climbDistance * Vector3.forward);
+			justClimbed = true;
+			metalSound.Play();
+		}
+		else{
+			
+			if(razerHydra.gachetteGauche && razerHydra.gachetteDroite)
+				grasp = true;
+			if(!razerHydra.gachetteGauche && !razerHydra.gachetteDroite && grasp) {
+				GetComponent(CharacterMotor).movement.gravity = 20;
+				grasp = false;
+			}
+		}
+	}
+}
+
 // Update is called once per frame
 function Update () {
 	
@@ -159,6 +195,9 @@ function Update () {
 	
 	// handles ladder climbing 
 	climbing();
+	
+	//handles monkey bar movements
+	monkeyMoving();
 }
 
 function OnTriggerEnter(trigger : Collider) {
@@ -186,6 +225,11 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "TopOfClimbingArea" && inClimbingArea) {
 		transform.position = trigger.transform.position;
 	}
+	
+	if(trigger.tag == "MonkeyBarArea") {
+		inMonkeyBarArea = true;
+		GetComponent(CharacterMotor).movement.gravity = 0;
+	}
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -204,6 +248,11 @@ function OnTriggerExit(trigger : Collider) {
 	if(trigger.tag == "ClimbingArea") {
 		inClimbingArea = false;
 		GetComponent(CharacterMotor).movement.gravity = 20;
+	}
+	if(trigger.tag == "MonkeyBarArea") {
+		inMonkeyBarArea = false;
+		GetComponent(CharacterMotor).movement.gravity = 20;
+
 	}
 }
 
