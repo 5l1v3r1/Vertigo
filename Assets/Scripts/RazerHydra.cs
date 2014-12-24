@@ -65,6 +65,8 @@ public class RazerHydra : MonoBehaviour {
 
 	// Checks if player holds the Hydras far enough from each other
 	bool armsApart() {
-		return Vector3.Distance (leftTrackerPos, rightTrackerPos) > 0.5f;
+		Vector2 leftPos = new Vector2 (leftTrackerPos.x, leftTrackerPos.z);
+		Vector2 rightPos = new Vector2 (rightTrackerPos.x, rightTrackerPos.z);
+		return Vector3.Distance (leftPos, rightPos) > 0.5f;
 	}
 }

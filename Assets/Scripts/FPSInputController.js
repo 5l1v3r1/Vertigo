@@ -41,7 +41,7 @@ private var inMonkeyBarArea: boolean = false;
 
 private var CamPosInit: Vector3;
 private var climbDistance : float = 0.8f;
-private var climbDelta : float = 1f;
+private var climbDelta : float = 30f;
 private var nextBalance :float = climbDelta;
 private var justClimbed : boolean = false;
 /*
@@ -171,7 +171,10 @@ function monkeyMoving(){
 		else if((nextBalance > 0 && razerHydra.balanceZ >= nextBalance ||
 			nextBalance < 0 && razerHydra.balanceZ <= nextBalance) && grasp) {
 			nextBalance = -nextBalance;
-			transform.Translate(climbDistance * Vector3.forward);
+			for(var i=0; i < 10; i++){
+				transform.Translate(4 * climbDistance * Vector3.forward* Time.deltaTime);
+				yield(0.1);
+			}
 			justClimbed = true;
 			metalSound.Play();
 		}
@@ -191,8 +194,9 @@ function monkeyMoving(){
 function Update () {
 	
 	// handles running, jumping and footsteps
-	playerMovement();
-	
+	if(!grasp) {
+		playerMovement();
+	}
 	// handles ladder climbing 
 	climbing();
 	
@@ -214,8 +218,7 @@ function OnTriggerEnter(trigger : Collider) {
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 		trigger.GetComponentInChildren(AudioSource).Play();
 		Debug.Log("entred");	
-	}
-	
+	}	
 	if(trigger.tag == "ClimbingArea") {
 		inClimbingArea = true;
 		GetComponent(CharacterMotor).movement.gravity = 0;
@@ -225,10 +228,15 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "TopOfClimbingArea" && inClimbingArea) {
 		transform.position = trigger.transform.position;
 	}
-	
 	if(trigger.tag == "MonkeyBarArea") {
 		inMonkeyBarArea = true;
 		GetComponent(CharacterMotor).movement.gravity = 0;
+	}
+	
+	if(trigger.tag == "FallingObject") {
+		var barrels : GameObject = trigger.gameObject.Find("BarrelGroup");
+		var child = barrels.Find("mixingbarrel01_prp");
+		child.rigidbody.AddForce(Vector3.forward*1000);
 	}
 }
 
@@ -251,6 +259,7 @@ function OnTriggerExit(trigger : Collider) {
 	}
 	if(trigger.tag == "MonkeyBarArea") {
 		inMonkeyBarArea = false;
+		grasp = false;
 		GetComponent(CharacterMotor).movement.gravity = 20;
 
 	}
@@ -300,7 +309,7 @@ function OnGUI() {
 function OnControllerColliderHit(hit: ControllerColliderHit){
 
 	if(hit.gameObject.name == "Sol")
-	 	transform.position = Vector3(-42.62825, 49.11555, -147.6305);
+	 	transform.localPosition = Vector3(0, 0, 0);
 }
 
 

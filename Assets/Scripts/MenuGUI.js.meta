@@ -2,7 +2,15 @@ fileFormatVersion: 2
 guid: 97f74a0836550b249839727829249d23
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - background: {instanceID: 0}
+  - title: {instanceID: 0}
+  - playButtonNormal: {instanceID: 0}
+  - playButtonHover: {instanceID: 0}
+  - playButtonActive: {instanceID: 0}
+  - exitButtonNormal: {instanceID: 0}
+  - exitButtonHover: {instanceID: 0}
+  - exitButtonActive: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
