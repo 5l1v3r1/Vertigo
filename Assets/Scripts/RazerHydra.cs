@@ -18,7 +18,6 @@ public class RazerHydra : MonoBehaviour {
 	public float balance;
 	public float balanceZ;
 
-	public bool button1 = false;
 	public bool gachetteGauche = false;
 	public bool gachetteDroite = false;
 
@@ -26,14 +25,17 @@ public class RazerHydra : MonoBehaviour {
 	vrTracker leftTracker, rightTracker;
 	Vector3 lastLeftTrackerPos, lastRightTrackerPos;
 
+	public Quaternion leftTrackerAngle;
+	public Quaternion rightTrackerAngle;
+
 	void Start() {
 		leftJoystick = MiddleVR.VRDeviceMgr.GetJoystickByIndex (0);
 		rightJoystick = MiddleVR.VRDeviceMgr.GetJoystickByIndex (1);
 		leftTracker = MiddleVR.VRDeviceMgr.GetTracker (0);
 		rightTracker = MiddleVR.VRDeviceMgr.GetTracker (1);
-		button1 = leftJoystick.IsButtonPressed (1);
 		gachetteGauche = leftJoystick.IsButtonPressed (0);
 		gachetteDroite = rightJoystick.IsButtonPressed (0);
+
 
 	}
 
@@ -53,14 +55,11 @@ public class RazerHydra : MonoBehaviour {
 		balance = Mathf.Clamp ((leftTrackerPos.y - rightTrackerPos.y) * 100f, -30f, 30f);
 		balanceZ = Mathf.Clamp ((leftTrackerPos.z - rightTrackerPos.z) * 100f, -30f, 30f);
 
-		
 		lastLeftTrackerPos = leftTrackerPos;
 		lastRightTrackerPos = rightTrackerPos;
-		button1 = leftJoystick.IsButtonPressed (1);
 		gachetteGauche = leftJoystick.IsButtonPressed (0);
 		gachetteDroite = rightJoystick.IsButtonPressed (0);
 
-		float distanceRazer = leftTrackerPos.x - rightTrackerPos.x;
 	}
 
 	// Checks if player holds the Hydras far enough from each other

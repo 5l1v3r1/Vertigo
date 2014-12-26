@@ -20,23 +20,17 @@ private var isBirdGenerationStarted : boolean = false;
 private var birdRotation;
 private var currentTightRope : GameObject;
 private var birdStartPoint;
-private var isSameDir : boolean;
 private var razerHydra;
 private var razerJumpAccel : float = 7f;
 private var footstepDelay : float = 0f;
-private var	canGraspJavelin: boolean = false;
-private var javelin = null;
 
 private var index:float;
 
 private var inClimbingArea: boolean = false;
-private var oneHand: boolean = false;
-private var twoHand: boolean =false;
-private var areSavedPos : boolean = false;
-private var leftY;
-private var rightY;
 
+private var grasp : boolean = false;
 private var inMonkeyBarArea: boolean = false;
+private var theMonkeyBar : GameObject = null;
 
 
 private var CamPosInit: Vector3;
@@ -147,6 +141,12 @@ function climbing() {
 		else if(nextBalance > 0 && razerHydra.balance >= nextBalance ||
 			nextBalance < 0 && razerHydra.balance <= nextBalance) {
 			nextBalance = -nextBalance;
+			
+			for(var i=0; i < 10; i++){
+				transform.Translate((climbDistance/10) * Vector3.up);
+				yield(0.1);
+			}
+			
 			transform.Translate(climbDistance * Vector3.up);
 			justClimbed = true;
 			metalSound.Play();
@@ -154,7 +154,6 @@ function climbing() {
 	}
 }
 
-private var grasp : boolean = false;
 function monkeyMoving(){
 
 	var leftPos = razerHydra.leftTrackerPos;
@@ -165,14 +164,14 @@ function monkeyMoving(){
 	if(inMonkeyBarArea){
 		
 		if(justClimbed) {
-			GetComponent(CharacterMotor).movement.gravity = 0;
+			//GetComponent(CharacterMotor).movement.gravity = 0;
 			justClimbed = false;
 		}
 		else if((nextBalance > 0 && razerHydra.balanceZ >= nextBalance ||
 			nextBalance < 0 && razerHydra.balanceZ <= nextBalance) && grasp) {
 			nextBalance = -nextBalance;
 			for(var i=0; i < 10; i++){
-				transform.Translate(4 * climbDistance * Vector3.forward* Time.deltaTime);
+				transform.Translate((climbDistance/10) * Vector3.forward);
 				yield(0.1);
 			}
 			justClimbed = true;
@@ -180,8 +179,16 @@ function monkeyMoving(){
 		}
 		else{
 			
-			if(razerHydra.gachetteGauche && razerHydra.gachetteDroite)
+			if(razerHydra.gachetteGauche && razerHydra.gachetteDroite) {
+				if(!grasp){
+					GetComponent(CharacterMotor).movement.gravity = 0;
+					for(var j=0; j<10; j++){
+						transform.Translate(Vector3.up/20);
+					}
+				}
 				grasp = true;
+				
+			}
 			if(!razerHydra.gachetteGauche && !razerHydra.gachetteDroite && grasp) {
 				GetComponent(CharacterMotor).movement.gravity = 20;
 				grasp = false;
@@ -230,7 +237,8 @@ function OnTriggerEnter(trigger : Collider) {
 	}
 	if(trigger.tag == "MonkeyBarArea") {
 		inMonkeyBarArea = true;
-		GetComponent(CharacterMotor).movement.gravity = 0;
+		theMonkeyBar = trigger.gameObject;
+		//GetComponent(CharacterMotor).movement.gravity = 0;
 	}
 	
 	if(trigger.tag == "FallingObject") {
@@ -260,6 +268,7 @@ function OnTriggerExit(trigger : Collider) {
 	if(trigger.tag == "MonkeyBarArea") {
 		inMonkeyBarArea = false;
 		grasp = false;
+		theMonkeyBar = null;
 		GetComponent(CharacterMotor).movement.gravity = 20;
 
 	}
@@ -292,18 +301,8 @@ function OnGUI() {
 		}
 	}
 	GUI.color = originalColor;
-	var labWidth: float = Screen.width/2;
-	var labHeight: float = Screen.height/4;
-	var xPos: float = Screen.width/4;
-	var yPos: float = Screen.height/8;
-	var gs = new GUIStyle(GUI.skin.label);
-	gs.fontSize = 24;
-	gs.fontStyle = FontStyle.Bold;
-	gs.alignment = TextAnchor.MiddleCenter;
+	
 
-	if(canGraspJavelin) {
-		GUI.Label(new Rect(xPos, yPos, labWidth, labHeight),"Appuyer sur la touche 1 de la manette gauche pour saisir le javelot", gs);
-	}
 }
 
 function OnControllerColliderHit(hit: ControllerColliderHit){
