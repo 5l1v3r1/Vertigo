@@ -25,8 +25,6 @@ public class RazerHydra : MonoBehaviour {
 	vrTracker leftTracker, rightTracker;
 	Vector3 lastLeftTrackerPos, lastRightTrackerPos;
 
-	public Quaternion leftTrackerAngle;
-	public Quaternion rightTrackerAngle;
 
 	void Start() {
 		leftJoystick = MiddleVR.VRDeviceMgr.GetJoystickByIndex (0);
@@ -53,7 +51,8 @@ public class RazerHydra : MonoBehaviour {
 		rightTrackerAccel = (rightTrackerPos - lastRightTrackerPos) * Time.deltaTime * 100000f;
 		
 		balance = Mathf.Clamp ((leftTrackerPos.y - rightTrackerPos.y) * 100f, -30f, 30f);
-		balanceZ = Mathf.Clamp ((leftTrackerPos.z - rightTrackerPos.z) * 100f, -30f, 30f);
+
+		balanceZ = Mathf.Clamp ( (leftTrackerPos.z - rightTrackerPos.z)* 100f, -30f, 30f);
 
 		lastLeftTrackerPos = leftTrackerPos;
 		lastRightTrackerPos = rightTrackerPos;

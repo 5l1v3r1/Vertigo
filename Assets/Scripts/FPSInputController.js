@@ -2,24 +2,19 @@
 Modified version of the FPSInputController from CharacterController
 */
 
+public var victorySound : AudioClip;
+public var listCheckPoints : GameObject[];
+private var currentCheckPoint : int = -1;
+
 public var VREnabled : boolean = true;//use VR controllers ?
 public var birdPrefab : GameObject;
 public var footsteps : AudioSource;
-public var arrowTop: Texture;
-public var arrowBottom : Texture;
 public var metalSound : AudioSource;
 
 private var motor : CharacterMotor;
 private var inTightRopeArea : boolean = false;//is the player in a tight rope module ?
- /*private var balance : float = 0f;//arm balance of the player (negative: leaning left, positive: leaning right) */
 private var tightRopeSpeed : float = 0.5f;//movement speed while on a tight rope
 
-private var balanceStep : float = 10f;//one press on A or E will modify the global balance by this amount
-
-private var isBirdGenerationStarted : boolean = false;
-private var birdRotation;
-private var currentTightRope : GameObject;
-private var birdStartPoint;
 private var razerHydra;
 private var razerJumpAccel : float = 7f;
 private var footstepDelay : float = 0f;
@@ -38,6 +33,8 @@ private var climbDistance : float = 0.8f;
 private var climbDelta : float = 30f;
 private var nextBalance :float = climbDelta;
 private var justClimbed : boolean = false;
+
+private var finish: boolean = false;
 /*
 updates the player's arm balancing
 */
@@ -46,7 +43,7 @@ function calculateBalance(){
 	//update current rotation according to the balance
 	transform.localEulerAngles.z = -razerHydra.balance;
 	//simulate dizziness
-	transform.Rotate(Vector3.up * Time.deltaTime * razerHydra.balance);
+	transform.Rotate(Vector3.up * Time.deltaTime * (2*razerHydra.balance));
 }
 
 // Use this for initialization
@@ -72,9 +69,9 @@ function playerMovement() {
 		// The player holds the hydras too close from each other, we make him slide to the side of the tight rope area where he is currently leaning to
 		else {
 			if (razerHydra.balance < 0)
-				directionVector = Vector3.left * tightRopeSpeed;
+				directionVector = (0.5*Vector3.left+Vector3.forward) * tightRopeSpeed;
 			else
-				directionVector = Vector3.right * tightRopeSpeed;
+				directionVector = (0.5*Vector3.right+Vector3.forward) * tightRopeSpeed;
 		}
 		
 	}
@@ -158,13 +155,10 @@ function monkeyMoving(){
 
 	var leftPos = razerHydra.leftTrackerPos;
 	var rightPos = razerHydra.rightTrackerPos;
-	//var rightBut = razerHydra.gachetteGauche;
-	//var leftBut = razerHydra.gachetteDroite;
 		
 	if(inMonkeyBarArea){
 		
 		if(justClimbed) {
-			//GetComponent(CharacterMotor).movement.gravity = 0;
 			justClimbed = false;
 		}
 		else if((nextBalance > 0 && razerHydra.balanceZ >= nextBalance ||
@@ -200,15 +194,36 @@ function monkeyMoving(){
 // Update is called once per frame
 function Update () {
 	
-	// handles running, jumping and footsteps
-	if(!grasp) {
-		playerMovement();
+	if(grasp || finish){
+		if(GetComponent(CharacterMotor).enabled == true) {
+			GetComponent(CharacterMotor).enabled = false;
+		}
+		if(finish) {
+			if(GetComponent("MouseLook").enabled == true) {
+				GetComponent("MouseLook").enabled = false;
+			}
+			if(!GameObject.Find("StartPos/Player/CamPos/VRRootNode").active)
+				GameObject.Find("StartPos/Player/CamPos/VRRootNode").SetActive(false);
+		
+			if(!GameObject.Find("StartPos/Player/Main Camera").GetComponent("Camera").enabled)
+				GameObject.Find("StartPos/Player/Main Camera").GetComponent("Camera").enabled = true;
+		}
 	}
+	else {
+		if(GetComponent(CharacterMotor).enabled == false) {
+			GetComponent(CharacterMotor).enabled = true;
+		}
+	}
+
+	// handles running, jumping and footsteps
+	playerMovement();
+	
 	// handles ladder climbing 
 	climbing();
 	
 	//handles monkey bar movements
 	monkeyMoving();
+	
 }
 
 function OnTriggerEnter(trigger : Collider) {
@@ -224,7 +239,6 @@ function OnTriggerEnter(trigger : Collider) {
 	if(trigger.tag == "WindTrigger"){
 		trigger.GetComponentInChildren(ParticleSystem).Play();
 		trigger.GetComponentInChildren(AudioSource).Play();
-		Debug.Log("entred");	
 	}	
 	if(trigger.tag == "ClimbingArea") {
 		inClimbingArea = true;
@@ -242,10 +256,21 @@ function OnTriggerEnter(trigger : Collider) {
 	}
 	
 	if(trigger.tag == "FallingObject") {
-		var barrels : GameObject = trigger.gameObject.Find("BarrelGroup");
-		var child = barrels.Find("mixingbarrel01_prp");
-		child.rigidbody.AddForce(Vector3.forward*1000);
+		var barrels = trigger.gameObject.transform.Find("BarrelGroup");
+		var child = barrels.transform.Find("mixingbarrel01_prp");
+		child.rigidbody.AddRelativeForce(Vector3.right*1000);
 	}
+	if(trigger.tag == "CheckPoint") {
+		if(currentCheckPoint < listCheckPoints.Length-1 && listCheckPoints[(currentCheckPoint+1)] == trigger.gameObject){
+			currentCheckPoint++;
+		}
+	}
+	if(trigger.tag == "FinalDest") {
+		audio.PlayOneShot(victorySound);
+		finish = true;
+		//Application.LoadLevel
+	}
+	
 }
 
 function OnTriggerExit(trigger : Collider) {
@@ -274,43 +299,29 @@ function OnTriggerExit(trigger : Collider) {
 	}
 }
 
-function OnGUI() {
-	
-	/* Visual metaphors to help the player find his stability*/
-	var x: int;
-	var y: int;
-	var originalColor: Color = GUI.color;
-
-	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
-	if(inTightRopeArea){
-		if(razerHydra.balance >= 10) {
-			x = 0;//Screen.width*0.25 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/8;
-			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
-			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/8;
-			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
-		}
-		if(razerHydra.balance <= -10) {
-			x = 0;//Screen.width*0.25 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/8;
-			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
-			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
-			y = Screen.height/2 - Screen.height/8;
-			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
-		}
-	}
-	GUI.color = originalColor;
-	
-
-}
-
 function OnControllerColliderHit(hit: ControllerColliderHit){
 
-	if(hit.gameObject.name == "Sol")
-	 	transform.localPosition = Vector3(0, 0, 0);
+	if(hit.gameObject.name == "Sol") {
+		if(currentCheckPoint < 0) {
+	 		transform.localPosition = Vector3(0, 0, 0);
+	 	}
+	 	else {
+	 		transform.position = listCheckPoints[currentCheckPoint].transform.position;
+	 	}
+	 }
 }
 
+public function getBalance(){
+	return razerHydra.balance;
+}
+
+public function isFinish(){
+	return finish;
+}
+
+public function isOnTightRope(){
+	return inTightRopeArea;
+}
 
 // Require a character controller to be attached to the same game object
 @script RequireComponent (CharacterMotor)
