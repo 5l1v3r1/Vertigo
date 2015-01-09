@@ -202,7 +202,7 @@ function Update () {
 			if(GetComponent("MouseLook").enabled == true) {
 				GetComponent("MouseLook").enabled = false;
 			}
-			if(!GameObject.Find("StartPos/Player/CamPos/VRRootNode").active)
+			if(!GameObject.Find("StartPos/Player/CamPos/VRRootNode").activeSelf)
 				GameObject.Find("StartPos/Player/CamPos/VRRootNode").SetActive(false);
 		
 			if(!GameObject.Find("StartPos/Player/Main Camera").GetComponent("Camera").enabled)
