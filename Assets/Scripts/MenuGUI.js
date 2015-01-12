@@ -9,6 +9,7 @@ public var exitButtonNormal : Texture;
 public var exitButtonHover : Texture;
 public var exitButtonActive : Texture;
 
+// Main menu
 function OnGUI() {
 
 	var gs = new GUIStyle(GUI.skin.button);

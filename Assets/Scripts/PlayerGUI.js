@@ -4,7 +4,7 @@ public var arrowTop: Texture;
 public var arrowBottom : Texture;
 private var FPSScript: FPSInputController;
 
-function Start(){
+function Start() {
 	FPSScript = GetComponent(FPSInputController);
 }
 
@@ -17,26 +17,28 @@ function OnGUI() {
 
 	GUI.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0.5);
 	if(FPSScript.isOnTightRope()){
+		
 		if(FPSScript.getBalance() >= 5) {
-			x = 0;//Screen.width*0.25 - Screen.height/6;
+			x = 0;
 			y = Screen.height/2 - Screen.height/8;
 			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
 			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
 			y = Screen.height/2 - Screen.height/8;
 			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
 		}
+		
 		if(FPSScript.getBalance() <= -5) {
-			x = 0;//Screen.width*0.25 - Screen.height/6;
+			x = 0;
 			y = Screen.height/2 - Screen.height/8;
 			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowTop,ScaleMode.ScaleToFit, true, 0);
 			x = Screen.width - Screen.height/4;//Screen.width*0.75 - Screen.height/6;
 			y = Screen.height/2 - Screen.height/8;
 			GUI.DrawTexture(Rect(x,y,Screen.height/4,Screen.height/4), arrowBottom, ScaleMode.ScaleToFit, true, 0);
 		}
-		
-		
 	}
 	GUI.color = originalColor;
+
+	// End menu
 	if(FPSScript.isFinish()){
 		y = Screen.height/2 - Screen.height/4;
 		x = Screen.width/2 - Screen.width/4;
@@ -57,10 +59,5 @@ function OnGUI() {
 		if(GUI.Button(Rect(x, y, Screen.width/3, Screen.height/4), "QUIT")){
 			Application.Quit();
 		}
-		
-		
 	}
-	
-	
-
 }

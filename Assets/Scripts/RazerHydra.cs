@@ -2,42 +2,46 @@
 using System.Collections;
 using MiddleVR_Unity3D;
 
+/*
+This class is an interface between Razer Hydra and the game
+*/
 
 public class RazerHydra : MonoBehaviour {
 
-	//left and right joysticks' axes
+	// Left and right joystick axes
 	public Vector2 leftJoyInput, rightJoyInput;
 
-	//left and right controllers' position
+	// Left and right controllers' position
 	public Vector3 leftTrackerPos, rightTrackerPos;
 
-	//left and right trackers' acceleration
+	// Left and right trackers' acceleration
 	public Vector3 leftTrackerAccel, rightTrackerAccel;
 
-	//equilibrium between both trackers
+	// Equilibrium between both trackers
 	public float balance;
 	public float balanceZ;
 
-	public bool gachetteGauche = false;
-	public bool gachetteDroite = false;
+	// Triggers
+	public bool leftTrigger = false;
+	public bool rightTrigger = false;
 
-	vrJoystick leftJoystick, rightJoystick;
-	vrTracker leftTracker, rightTracker;
-	Vector3 lastLeftTrackerPos, lastRightTrackerPos;
-
+	private vrJoystick leftJoystick, rightJoystick;
+	private vrTracker leftTracker, rightTracker;
+	private Vector3 lastLeftTrackerPos, lastRightTrackerPos;
 
 	void Start() {
+		// Grab all controlers...
 		leftJoystick = MiddleVR.VRDeviceMgr.GetJoystickByIndex (0);
 		rightJoystick = MiddleVR.VRDeviceMgr.GetJoystickByIndex (1);
 		leftTracker = MiddleVR.VRDeviceMgr.GetTracker (0);
 		rightTracker = MiddleVR.VRDeviceMgr.GetTracker (1);
-		gachetteGauche = leftJoystick.IsButtonPressed (0);
-		gachetteDroite = rightJoystick.IsButtonPressed (0);
-
-
+		leftTrigger = leftJoystick.IsButtonPressed (0);
+		rightTrigger = rightJoystick.IsButtonPressed (0);
 	}
 
+	// Grab latest controller data
 	void Update () {
+
 		leftJoyInput.x = leftJoystick.GetAxisValue (0);
 		leftJoyInput.y = leftJoystick.GetAxisValue (1);
 		
@@ -56,8 +60,8 @@ public class RazerHydra : MonoBehaviour {
 
 		lastLeftTrackerPos = leftTrackerPos;
 		lastRightTrackerPos = rightTrackerPos;
-		gachetteGauche = leftJoystick.IsButtonPressed (0);
-		gachetteDroite = rightJoystick.IsButtonPressed (0);
+		leftTrigger = leftJoystick.IsButtonPressed (0);
+		rightTrigger = rightJoystick.IsButtonPressed (0);
 
 	}
 

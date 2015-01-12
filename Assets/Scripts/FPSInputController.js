@@ -1,4 +1,4 @@
-	/*
+/*
 Modified version of the FPSInputController from CharacterController
 */
 
@@ -35,18 +35,16 @@ private var nextBalance :float = climbDelta;
 private var justClimbed : boolean = false;
 
 private var finish: boolean = false;
-/*
-updates the player's arm balancing
-*/
+
+// Update player's balance, based on Hydras
 function calculateBalance(){
 
-	//update current rotation according to the balance
+	// update current rotation according to the balance
 	transform.localEulerAngles.z = -razerHydra.balance;
-	//simulate dizziness
+	// simulate dizziness
 	transform.Rotate(Vector3.up * Time.deltaTime * (2*razerHydra.balance));
 }
 
-// Use this for initialization
 function Awake () {
 	CamPosInit = GameObject.Find("CamPos").transform.localPosition;
 	motor = GetComponent(CharacterMotor);
@@ -126,6 +124,7 @@ function playerMovement() {
 	}
 }
 
+// Handles the ladder climbing metaphor
 function climbing() {
 	// Climbing
 	var leftPos = razerHydra.leftTrackerPos;
@@ -151,6 +150,7 @@ function climbing() {
 	}
 }
 
+// Handles the monkey bar movement metaphor
 function monkeyMoving(){
 
 	var leftPos = razerHydra.leftTrackerPos;
@@ -173,7 +173,7 @@ function monkeyMoving(){
 		}
 		else{
 			
-			if(razerHydra.gachetteGauche && razerHydra.gachetteDroite) {
+			if(razerHydra.leftTrigger && razerHydra.rightTrigger) {
 				if(!grasp){
 					GetComponent(CharacterMotor).movement.gravity = 0;
 					for(var j=0; j<10; j++){
@@ -183,7 +183,7 @@ function monkeyMoving(){
 				grasp = true;
 				
 			}
-			if(!razerHydra.gachetteGauche && !razerHydra.gachetteDroite && grasp) {
+			if(!razerHydra.leftTrigger && !razerHydra.rightTrigger && grasp) {
 				GetComponent(CharacterMotor).movement.gravity = 20;
 				grasp = false;
 			}
@@ -191,7 +191,6 @@ function monkeyMoving(){
 	}
 }
   
-// Update is called once per frame
 function Update () {
 	
 	if(grasp || finish){
@@ -221,11 +220,15 @@ function Update () {
 	// handles ladder climbing 
 	climbing();
 	
-	//handles monkey bar movements
+	// handles monkey bar movements
 	monkeyMoving();
 	
 }
 
+/* Most events are scripted like this:
+	- Player enters a trigger with a tag T
+	- A script for that type of trigger T is executed
+*/
 function OnTriggerEnter(trigger : Collider) {
 	
 	if(trigger.tag == "TightRopeArea") {
@@ -273,6 +276,7 @@ function OnTriggerEnter(trigger : Collider) {
 	
 }
 
+/* Same principle */
 function OnTriggerExit(trigger : Collider) {
 
 	if(trigger.tag == "TightRopeArea") {
